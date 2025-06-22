@@ -2,32 +2,49 @@ TEMPLATE := template.ml
 BIN := run.out
 
 # Créer un dossier d'exercice avec les fichiers vides
-new:
-	mkdir -p $(NAME)
-	cp $(TEMPLATE) $(NAME)/main.ml
-	touch $(NAME)/test.input $(NAME)/test.output $(NAME)/dataset.input
-	@echo "✅ Créé le dossier $(NAME) avec les fichiers nécessaires."
+create:
+	@echo "Création du dossier $(NAME) et copie de template.ml..."
+	@mkdir -p $(NAME)
+	@cp template.ml $(NAME)/main.ml
+	@echo "Entrez le contenu de $(NAME)/test.input (ligne vide pour terminer) :"
+	@rm -f $(NAME)/test.input
+	@while true; do \
+		read -r line; \
+		[ -z "$$line" ] && break; \
+		echo "$$line" >> $(NAME)/test.input; \
+	done
+	@echo "Entrez le contenu de $(NAME)/test.output (ligne vide pour terminer) :"
+	@rm -f $(NAME)/test.output
+	@while true; do \
+		read -r line; \
+		[ -z "$$line" ] && break; \
+		echo "$$line" >> $(NAME)/test.output; \
+	done
+	@echo "Création d'un fichier $(NAME)/dataset.input vide"
+	@> $(NAME)/dataset.input
+	@echo "✅ Dossier $(NAME) créé avec test et dataset.input vide."
+
 
 # Compiler le programme
 build:
 	ocamlopt -o $(BIN) $(NAME)/main.ml
 
-# Tester + résoudre le vrai dataset
-run: build
+test: build
 	@echo "🔍 Test sur les données de test..."
-	@bash -c '\
-		OUTPUT=$$(./$(BIN) $(NAME)/test.input); \
-		EXPECTED=$$(cat $(NAME)/test.output); \
-		if [ "$$OUTPUT" = "$$EXPECTED" ]; then \
-			echo "✅ Test passé."; \
-		else \
-			echo "❌ Test échoué."; \
-			echo "--- Sortie obtenue ---"; \
-			echo "$$OUTPUT"; \
-			echo "--- Sortie attendue ---"; \
-			echo "$$EXPECTED"; \
-			exit 1; \
-		fi'
+	@./run.out $(NAME)/test.input > $(NAME)/test.actual
+	@diff -u $(NAME)/test.output $(NAME)/test.actual > $(NAME)/test.diff || true
+	@if [ -s $(NAME)/test.diff ]; then \
+		echo "❌ Test échoué. Différences :"; \
+		cat $(NAME)/test.diff; \
+		exit 1; \
+	else \
+		echo "✅ Test réussi."; \
+		rm $(NAME)/test.actual $(NAME)/test.diff; \
+	fi
+
+
+# Tester + résoudre le vrai dataset
+run: build test
 	@echo "📦 Exécution sur le dataset réel..."
 	@./$(BIN) $(NAME)/dataset.input > $(NAME)/dataset.output
 	@echo "✅ Résultat écrit dans $(NAME)/dataset.output"
