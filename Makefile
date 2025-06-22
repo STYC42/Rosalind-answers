@@ -3,26 +3,25 @@ BIN := run.out
 
 # Créer un dossier d'exercice avec les fichiers vides
 create:
-	@echo "Création du dossier $(NAME) et copie de template.ml..."
+	@echo "📁 Création du dossier $(NAME) et copie de template.ml..."
 	@mkdir -p $(NAME)
 	@cp template.ml $(NAME)/main.ml
-	@echo "Entrez le contenu de $(NAME)/test.input (ligne vide pour terminer) :"
+	@echo "✍️  Entrez le contenu de $(NAME)/test.input (ligne vide pour terminer) :"
 	@rm -f $(NAME)/test.input
 	@while true; do \
 		read -r line; \
 		[ -z "$$line" ] && break; \
 		echo "$$line" >> $(NAME)/test.input; \
 	done
-	@echo "Entrez le contenu de $(NAME)/test.output (ligne vide pour terminer) :"
+	@echo "✍️  Entrez le contenu de $(NAME)/test.output (ligne vide pour terminer) :"
 	@rm -f $(NAME)/test.output
 	@while true; do \
 		read -r line; \
 		[ -z "$$line" ] && break; \
 		echo "$$line" >> $(NAME)/test.output; \
 	done
-	@echo "Création d'un fichier $(NAME)/dataset.input vide"
-	@> $(NAME)/dataset.input
-	@echo "✅ Dossier $(NAME) créé avec test et dataset.input vide."
+	@echo "✅ Dossier $(NAME) prêt avec test.input et test.output."
+
 
 
 # Compiler le programme
@@ -45,9 +44,17 @@ test: build
 
 # Tester + résoudre le vrai dataset
 run: build test
-	@echo "📦 Exécution sur le dataset réel..."
-	@./$(BIN) $(NAME)/dataset.input > $(NAME)/dataset.output
+	@echo "📦 Entrez le dataset réel (ligne vide pour terminer) :"
+	@rm -f $(NAME)/dataset.output
+	@rm -f $(NAME)/dataset.input
+	@while true; do \
+		read -r line; \
+		[ -z "$$line" ] && break; \
+		echo "$$line" >> $(NAME)/dataset.input; \
+	done
+	@./run.out $(NAME)/dataset.input > $(NAME)/dataset.output
 	@echo "✅ Résultat écrit dans $(NAME)/dataset.output"
+
 
 # Nettoyage
 clean:
@@ -55,8 +62,8 @@ clean:
 	@rm -f $(BIN)
 	@find . -type f \( -name "*.cmi" -o -name "*.cmo" -o -name "*.cmx" -o -name "*.o" -o -name "*.annot" \) -delete
 	@find . -type f -name "dataset.output" -delete
-	@find . -type f -name "dataset.input" -exec truncate -s 0 {} \;
-	@echo "✅ Nettoyage terminé."
+	@find . -type f -name "dataset.input" -delete
+
 
 reset:
 	@echo "♻️  Réinitialisation de $(NAME)..."
