@@ -6,6 +6,8 @@ create:
 	@echo "📁 Création du dossier $(NAME) et copie de template.ml..."
 	@mkdir -p $(NAME)
 	@cp template.ml $(NAME)/main.ml
+	@echo "(executable (name main))" > $(NAME)/dune
+	@echo "(lang dune 3.18)" > $(NAME)/dune-project
 	@echo "✍️  Entrez le contenu de $(NAME)/test.input (ligne vide pour terminer) :"
 	@rm -f $(NAME)/test.input
 	@while true; do \
@@ -28,7 +30,6 @@ create:
 build:
 	@cd $(NAME) && dune build
 	@cp $(NAME)/_build/default/main.exe $(BIN) && chmod u+w $(BIN)
-	@cd $(NAME) && dune clean
 
 test: build
 	@echo "🔍 Test sur les données de test..."
