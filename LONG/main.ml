@@ -1,10 +1,3 @@
-let read_file filename =
-  let ic = open_in filename in
-  let n = in_channel_length ic in
-  let s = really_input_string ic n in
-  close_in ic;
-  s
-
 let read_fasta filename =
   let ic = open_in filename in
   let rec read_lines acc current_id current_seq =
@@ -41,7 +34,7 @@ let analyze_strands s =
   List.iter (
     fun (k, v) ->
       String.iteri (
-        fun i c ->
+        fun i _ ->
           Hashtbl.add prf (String.sub v 0 i) k
       ) v
   ) s;
@@ -69,13 +62,13 @@ let build_string s =
   ) s;
   let last = ref "" in
   List.iter (
-    fun (k, v) ->
+    fun (k, _) ->
       match Hashtbl.find_opt con k with
-      | Some a -> ()
+      | Some _ -> ()
       | None -> last := k
   ) s;
   let res = ref [Hashtbl.find f !last] in
-  for i = 2 to List.length s do
+  for _ = 2 to List.length s do
     last := Hashtbl.find rcon !last;
     let v = Hashtbl.find f !last in
     let nv = String.length v in

@@ -8,7 +8,7 @@ let read_file filename =
 let codon_table () =
   let ic = Scanf.Scanning.open_in "RNAcodon.table" in
   let ht = Hashtbl.create 64 in
-  for i = 1 to 64 do
+  for _ = 1 to 64 do
     let k, v = Scanf.bscanf ic " %s %s" (fun a b -> (a, b)) in
     Hashtbl.add ht k v
   done;

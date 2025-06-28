@@ -1,10 +1,3 @@
-let read_file filename =
-  let ic = open_in filename in
-  let n = in_channel_length ic in
-  let s = really_input_string ic n in
-  close_in ic;
-  s
-
 let read_fasta filename =
   let ic = open_in filename in
   let rec read_lines acc current_id current_seq =
@@ -30,14 +23,6 @@ let read_fasta filename =
       List.rev acc
   in
   read_lines [] None []
-
-let fasta_ht s =
-  let res = Hashtbl.create 1 in
-  List.iter (
-    fun (k, v) ->
-      Hashtbl.add res k v
-  ) s;
-  res
 
 let fasta_revht s =
   let res = Hashtbl.create 1 in
@@ -87,7 +72,7 @@ let values s =
 let valids strings =
   let res = ref [] in
   Hashtbl.iter (
-    fun s c ->
+    fun s _ ->
       let fa = Hashtbl.find_all strings s in
       if List.length fa >= 2 then res := s :: !res
   ) strings;
@@ -96,7 +81,7 @@ let valids strings =
 let not_valids strings =
   let res = ref [] in
   Hashtbl.iter (
-    fun s c ->
+    fun s _ ->
       let fa = Hashtbl.find_all strings s in
       if List.length fa = 1 then res := s :: !res
   ) strings;
@@ -116,7 +101,7 @@ let main s =
       ) vals
   ) nvals;
   Hashtbl.iter (
-    fun s c ->
+    fun s _ ->
       match Hashtbl.find_opt changes s with
       | Some a -> Printf.printf "%s->%s\n" s a
       | None -> ()
