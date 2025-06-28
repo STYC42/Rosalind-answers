@@ -43,6 +43,29 @@ test: build
 		rm $(NAME)/test.actual $(NAME)/test.diff; \
 	fi
 
+test_all:
+	@for d in */ ; do \
+		case $$d in \
+			.*) ;; \
+			*) DIR=$${d%/}; \
+			   printf "Testing %s... " "$$DIR"; \
+			   dune build --root $$DIR > /dev/null 2>&1 || { \
+			      echo "Fail (build error)"; exit 1; }; \
+			   ./$$DIR/_build/default/main.exe $$DIR/test.input > $$DIR/test.actual 2>/dev/null || { \
+			      echo "Fail (execution error)"; exit 1; }; \
+			   diff -u $$DIR/test.output $$DIR/test.actual > $$DIR/test.diff || true; \
+			   if [ -s $$DIR/test.diff ]; then \
+			     echo "Fail"; \
+			     cat $$DIR/test.diff; \
+			     exit 1; \
+			   else \
+			     echo "Done"; \
+			     rm -f $$DIR/test.actual $$DIR/test.diff; \
+			   fi; \
+		esac; \
+	done; \
+	echo "All tests passed."
+
 
 # Tester + résoudre le vrai dataset
 run: build test
