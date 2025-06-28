@@ -26,7 +26,9 @@ create:
 
 # Compiler le programme
 build:
-	ocamlopt -o $(BIN) $(NAME)/main.ml
+	@cd $(NAME) && dune build
+	@cp $(NAME)/_build/default/main.exe $(BIN) && chmod u+w $(BIN)
+	@cd $(NAME) && dune clean
 
 test: build
 	@echo "🔍 Test sur les données de test..."

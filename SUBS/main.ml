@@ -22,7 +22,7 @@ let rec calcule_mod a =
 
 let hash_prog o p s e =
   let ret = ref s in
-  for i = 1 to p - 1 do
+  for _ = 1 to p - 1 do
     ret := !ret lsl 8 |> calcule_mod
   done;
   let crt = (o - !ret) in
