@@ -86,6 +86,7 @@ run: build test
 clean:
 	@echo "🧹 Nettoyage des fichiers temporaires..."
 	@rm -f $(BIN)
+	@rm -f *.fasta
 	@find . -type f \( -name "*.cmi" -o -name "*.cmo" -o -name "*.cmx" -o -name "*.o" -o -name "*.annot" \) -delete
 	@find . -type f -name "dataset.output" -delete
 	@find . -type f -name "dataset.input" -delete
