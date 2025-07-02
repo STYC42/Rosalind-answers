@@ -1,0 +1,4 @@
+{cat, elephant} {mouse, rabbit} 
+{dog, elephant} {mouse, rabbit} 
+{dog, elephant} {rabbit, robot} 
+{cat, dog} {mouse, rabbit} 
