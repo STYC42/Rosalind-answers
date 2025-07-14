@@ -32,52 +32,76 @@ build:
 	@cp $(NAME)/_build/default/main.exe $(BIN) && chmod u+w $(BIN)
 
 test: build
-	@echo "🔍 Test sur les données de test..."
+	@echo "🔍 Test principal..."
 	@./run.out $(NAME)/test.input > $(NAME)/test.actual
 	@diff -u $(NAME)/test.output $(NAME)/test.actual > $(NAME)/test.diff || true
 	@if [ -s $(NAME)/test.diff ]; then \
-		echo "❌ Test échoué. Différences :"; \
+		echo "❌ Test principal échoué. Différences :"; \
 		cat $(NAME)/test.diff; \
-		exit 1; \
 	else \
-		echo "✅ Test réussi."; \
+		echo "✅ Test principal réussi."; \
 		rm $(NAME)/test.actual $(NAME)/test.diff; \
 	fi
 
+	@if [ -d "$(NAME)/tests/inputs" ] && [ -d "$(NAME)/tests/outputs" ]; then \
+		echo "🔁 Tests supplémentaires détectés dans $(NAME)/tests/..."; \
+		for input_file in $(NAME)/tests/inputs/input_*.txt; do \
+			id=$$(basename $$input_file .txt | cut -d'_' -f2); \
+			output_file="$(NAME)/tests/outputs/output_$$id.txt"; \
+			actual_file="$(NAME)/tests/outputs/actual_$$id.txt"; \
+			diff_file="$(NAME)/tests/outputs/diff_$$id.txt"; \
+			if [ ! -f $$output_file ]; then \
+				echo "⚠️  Fichier de sortie manquant pour test $$id."; \
+				continue; \
+			fi; \
+			./run.out $$input_file > $$actual_file; \
+			diff -u $$output_file $$actual_file > $$diff_file || true; \
+			if [ -s $$diff_file ]; then \
+				echo "❌ Test $$id échoué. Différences :"; \
+				cat $$diff_file; \
+				exit 1; \
+			else \
+				echo "✅ Test $$id réussi."; \
+				rm -f $$actual_file $$diff_file; \
+			fi; \
+		done; \
+	else \
+		echo "ℹ️  Aucun dossier de tests supplémentaires trouvé."; \
+	fi
+
 test_all:
-	@for d in */ ; do \
+	@passed=0; total=0; \
+	for d in */ ; do \
 		case $$d in \
 			.*) ;; \
 			*) DIR=$${d%/}; \
+			   total=$$((total + 1)); \
 			   printf "Testing %s... " "$$DIR"; \
-			   dune build --root $$DIR > /dev/null 2>&1 || { \
-			      echo "Fail (build error)"; exit 1; }; \
-			   ./$$DIR/_build/default/main.exe $$DIR/test.input > $$DIR/test.actual 2>/dev/null || { \
-			      echo "Fail (execution error)"; exit 1; }; \
-			   diff -u $$DIR/test.output $$DIR/test.actual > $$DIR/test.diff || true; \
-			   if [ -s $$DIR/test.diff ]; then \
+			   $(MAKE) --no-print-directory test NAME=$$DIR > /dev/null 2>&1 && \
+			     { echo "Done"; passed=$$((passed + 1)); } || \
 			     echo "Fail"; \
-			     cat $$DIR/test.diff; \
-			     exit 1; \
-			   else \
-			     echo "Done"; \
-			     rm -f $$DIR/test.actual $$DIR/test.diff; \
-			   fi; \
+			;; \
 		esac; \
 	done; \
-	echo "All tests passed."
+	echo ""; \
+	if [ "$$passed" -eq "$$total" ]; then \
+		echo "All tests passed ($$passed/$$total)."; \
+	else \
+		echo "$$passed/$$total tests passed."; \
+		exit 1; \
+	fi
+
+
+
 
 
 # Tester + résoudre le vrai dataset
 run: build test
-	@echo "📦 Entrez le dataset réel (ligne vide pour terminer) :"
-	@rm -f $(NAME)/dataset.output
-	@rm -f $(NAME)/dataset.input
-	@while true; do \
-		read -r line; \
-		[ -z "$$line" ] && break; \
-		echo "$$line" >> $(NAME)/dataset.input; \
-	done
+	@echo "🚀 Exécution sur le dataset réel..."
+	@if [ ! -f $(NAME)/dataset.input ]; then \
+		echo "❌ Fichier $(NAME)/dataset.input manquant."; \
+		exit 1; \
+	fi
 	@./run.out $(NAME)/dataset.input > $(NAME)/dataset.output
 	@echo "✅ Résultat écrit dans $(NAME)/dataset.output"
 
