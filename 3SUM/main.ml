@@ -10,21 +10,20 @@ exception Found of int*int*int
 let read_int ic = Scanf.bscanf ic " %d" (fun i -> i)
 
 let sum3 a =
-        let h = Hashtbl.create 1 in
-        Array.iteri (fun i x ->
-                Array.iteri (fun j y ->
-                        if i < j then
-                                Hashtbl.add h (-x-y) (i, j)
-                ) a
-        ) a;
+        let h = Hashtbl.create 100000 in
+        for i = 0 to Array.length a - 1 do
+                for j = i+1 to Array.length a - 1 do
+                        Hashtbl.add h (-a.(i)-a.(j)) (i, j)
+                done
+        done;
         try
-                Array.iteri (fun l w ->
-                        let fa = Hashtbl.find_all h w in
+                for l = 0 to Array.length a - 1 do
+                        let fa = Hashtbl.find_all h a.(l) in
                         List.iter (fun (i, j) ->
                                 if l <> i && l <> j then
                                         raise (Found (i, j, l))
                         ) fa
-                ) a;
+                done;
                 None
         with Found (i, j, k) -> Some (i, j, k)
 
@@ -36,7 +35,10 @@ let main s =
           let a = Array.init n (fun _ -> read_int ic) in
           match sum3 a with
           | None -> print_endline "-1"
-          | Some (i, j, k) -> Printf.printf "%d %d %d\n" i j k
+          | Some (i, j, k) -> begin
+                  [i+1; j+1; k+1] |> List.sort compare |> List.iter (Printf.printf "%d ");
+                  print_newline ()
+          end
   done
 
 
