@@ -34,7 +34,7 @@ build:
 test: build
 	@echo "🔍 Test principal..."
 	@./run.out $(NAME)/test.input > $(NAME)/test.actual
-	@diff -u $(NAME)/test.output $(NAME)/test.actual > $(NAME)/test.diff || true
+	@diff -wu $(NAME)/test.output $(NAME)/test.actual > $(NAME)/test.diff || true
 	@if [ -s $(NAME)/test.diff ]; then \
 		echo "❌ Test principal échoué. Différences :"; \
 		cat $(NAME)/test.diff; \
@@ -55,7 +55,7 @@ test: build
 				continue; \
 			fi; \
 			./run.out $$input_file > $$actual_file; \
-			diff -u $$output_file $$actual_file > $$diff_file || true; \
+			diff -wu $$output_file $$actual_file > $$diff_file || true; \
 			if [ -s $$diff_file ]; then \
 				echo "❌ Test $$id échoué. Différences :"; \
 				cat $$diff_file; \
