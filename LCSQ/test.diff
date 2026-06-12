@@ -1,0 +1,6 @@
+--- LCSQ/test.output	2026-06-12 19:56:23.836879339 +0200
++++ LCSQ/test.actual	2026-06-12 20:59:28.639409103 +0200
+@@ -1 +1 @@
+-AACTGG
++AACTTG
+\ Pas de fin de ligne à la fin du fichier
