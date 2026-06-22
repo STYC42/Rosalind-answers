@@ -1,0 +1,4 @@
+>s1
+ABCDEFG
+>s2
+ABCDEF
